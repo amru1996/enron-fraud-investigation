@@ -88,7 +88,6 @@ for feature in features_list:
 
 # In[19]:
 
-get_ipython().magic(u'matplotlib inline')
 import matplotlib.pyplot as plt
 
 for feature in features_list:
