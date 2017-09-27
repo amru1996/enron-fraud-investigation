@@ -1,5 +1,6 @@
 
 # enron-fraud-investigation
+
 Identify Fraud from Enron Email
 Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those? [relevant rubric items: “data exploration”, “outlier investigation”]
 The goal of the project is to identify employees from Enron who may have committed fraud based on the public Enron financial and email dataset, i.e., a person of interest. We define a person of interest (POI) as an individual who was indicted, reached a settlement or plea deal with the government, or testified in exchange for prosecution immunity.
@@ -33,15 +34,30 @@ However it was observed that the fraction had values greater than 1 (which is be
 Scaling
 Proprocessing via scaling was performed when I used the k-nearest neighbours algorithm and the support vector machines (SVM) algorithm, but not when I used a decision tree.
 As described on stats.stackexchange (link for k-nearest neighbours; link for SVM), normalization is required for:
-k-nearest neighbours because the distance between the points drives the clustering that determines the nearest neighbours. If one feature has a much larger scale than another, the clustering will be driven by the larger scale and the distance between points on the smaller scale will be overshadowed. SVM because the distance between the separating plane and the support vectors drives the algorithm's decision-making. If one feature has a much larger scale than another, it will dominate the other features distance-wise. Scaling isn't required for tree-based algorithms because the splitting of the data is based on a threshold value. This decision made based on this threshold value is not affected by different scales.Selection Process
+k-nearest neighbours because the distance between the points drives the clustering that determines the nearest neighbours. If one feature has a much larger scale than another, the clustering will be driven by the larger scale and the distance between points on the smaller scale will be overshadowed. SVM because the distance between the separating plane and the support vectors drives the algorithm's decision-making. If one feature has a much larger scale than another, it will dominate the other features distance-wise. Scaling isn't required for tree-based algorithms because the splitting of the data is based on a threshold value. This decision made based on this threshold value is not affected by different scales.
+Selection Process
 I used a univariate feature selection process, select k-best, in a pipeline with grid search to select the features. Select k-best removes all but the k highest scoring features. The number of features, 'k', was chosen through an exhaustive grid search driven by the 'f1' scoring estimator, intending to maximize precision and recall.
 Features Selected
 I used the following six features in my POI identifier, which was a decision tree classifier. The first number is feature importance (from the decision tree classifier) and the second is feature score (from select k-best). The order of features is descending based on feature importance.
 To arrive at a constant selected featureset, multiple iterations of the above were performed and a union of the result along with the result yielded from Kbest was considered for the final list of 15 features. 
 Some intuition has also gone into the selection of the final list.Like the number of from_mails/to_mails cannot determine a person as a POI.The records having valid entries for restricted_stock_deferred or for deferral_payments are very less and hence can add negligible value to the algorithm.
 Feature no. 1: bonus_salary_ratio (0.658595952706) (22.1067164085) Feature no. 2: shared_receipt_with_poi (0.180270198721) (6.1299573021) Feature no. 3: total_stock_value (0.161133848573) (16.8651432616) Feature no. 4: exercised_stock_options (0.0) (16.9328653375) Feature no. 5: bonus (0.0) (34.2129648303) Feature no. 6: salary (0.0) (17.7678544529) Bonus salary ratio, shared receipt with a POI, and total stock value were the most important features.
-Feature Scaling
-
+FEATURE SELECTION: 
+The existing features and the additionally engineered featured are fed into the ExtraTreesClassifier to get the feature_importances value for each of the feature and the same is used to trim the model to the relevant feature. 
+Choice of number of features: 
+A combination of Kbest and feature_importances from trees is used to arrive at the best features. 
+In the trees method adopted the median value of the importances are considered and those features with values greater than the median value is taken for further processing.The feature_ importances are dynamic and hence the number of features chosen also varies between 8-12. 
+To arrive at a constant selected featureset, multiple iterations of the above were performed and a union of the result along with the result yielded from Kbest was considered for the final list of 15 features. 
+Features 	KBest Scores 	Feature_imp-iter 1 	Feature_imp-iter 2 	Feature_imp-iter 3 
+Salary 	7.57E+00 	0.05855429 	0 	0.09498808 
+deferral_payments 	6.92E-01 	0 	0 	0 
+total_payments 	5.13E+00 	0.08315694 	0.08315694 	0.08315694 
+loan_advances 	5.01E+00 	0 	0 	0 
+bonus 	1.12E+01 	0.1113461 	0 	0.06580387 
+restricted_stock_deferred 	1.06E-01 	0 	0 	0 
+deferred_income 	6.66E+00 	0 	0 	0 
+PERFORMANCE Achieved with different combinations (Precision and Recall): 
+The decision tree classifier had a precision of 0.31336 and a recall of 0.59100, both above the 0.3 threshold. The SVM classifier (with features scaled) had a gaudy precision of 0.83333, but a poor recall of 0.06500. The k-nearest neighbours classifier had a precision of 0.32247 and a recall of 0.29200. 
 What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms? [relevant rubric item: “pick an algorithm”]
 I focused on three algorithms, with parameter tuning incorporated into algorithm selection (i.e. parameters tuned for more than one algorithm, and best algorithm-tune combination selected for final analysis). These algorithms were:
 decision tree classifier SVM k-nearest neighbors Though I used the classfiication report for quick checks, I used tester.py's evaluation metrics to make sure I would get precision and recall above 0.3 for the Udacity grading system. Here is how each performed:
@@ -79,4 +95,3 @@ True negatives: 5954
 The two notable evaluation metrics for this POI identifier are precision and recall. The average precision for my decision tree classifier was 0.31336 and the average recall was 0.59100. What do each of these mean?
 Precision is how often our class prediction (POI vs. non-POI) is right when we guess that class Recall is how often we guess the class (POI vs. non-POI) when the class actually occurred In the context of our POI identifier, it is arguably more important to make sure we don't miss any POIs, so we don't care so much about precision. Imagine we are law enforcement using this algorithm as a screener to determine who to prosecute. When we guess POI, it is not the end of the world if they aren't a POI because we'll do due diligence. We won't put them in jail right away. For our case, we want high recall: when it is a POI, we need to make sure we catch them in our net. The decision tree algorithm performed best in recall (0.59) of the algorithms I tried, hence it being my choice for final analysis.
 
-# enron-fraud-investigation
